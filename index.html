@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hantelbuch – Trainingstagebuch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF0EE; --surface:#FFFFFF; --ink:#23282D; --muted:#687079; --line:#D5D9DC;
+  --blue:#2451C4; --blue-soft:#DCE5FA; --yellow:#E3AE1B; --yellow-soft:#FBF0CF; --red:#C23A2E; --green:#2E8B57;
+  --field:#F4F5F4;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181C20; --surface:#22272C; --ink:#E9ECEE; --muted:#9AA3AB; --line:#353C43;
+    --blue:#6F94F2; --blue-soft:#26324F; --yellow:#F0C347; --yellow-soft:#3D3419; --red:#EB6A5E; --green:#5CC28A;
+    --field:#1C2125; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181C20; --surface:#22272C; --ink:#E9ECEE; --muted:#9AA3AB; --line:#353C43;
+  --blue:#6F94F2; --blue-soft:#26324F; --yellow:#F0C347; --yellow-soft:#3D3419; --red:#EB6A5E; --green:#5CC28A;
+  --field:#1C2125; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.num,h1,h2,h3,.tab,.btn-big{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 110px}
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font-size:2.1rem;font-weight:700;line-height:1;margin:0;letter-spacing:.01em}
+.sync{font-size:.82rem;color:var(--muted)}
+h2{font-size:1.5rem;font-weight:600;margin:28px 0 10px;line-height:1.1}
+h3{font-size:1.2rem;font-weight:600;margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs .inner{display:flex;max-width:720px;width:100%}
+.tab{flex:1;background:none;border:0;padding:12px 4px 14px;font-size:1.15rem;font-weight:600;color:var(--muted);border-top:3px solid transparent;margin-top:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-top-color:var(--blue)}
+
+/* Plate row: the signature element — each week is a plate on the bar */
+.bar{position:relative;display:flex;align-items:center;gap:5px;padding:18px 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow-x:auto}
+.bar::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:6px;margin-top:-3px;background:var(--line);border-radius:3px}
+.plate{position:relative;flex:0 0 auto;width:22px;border-radius:5px;background:var(--field);border:1px solid var(--line);display:flex;align-items:flex-end;justify-content:center}
+.plate.on{background:var(--blue);border-color:var(--blue)}
+.plate.now{outline:2px dashed var(--muted);outline-offset:2px}
+.plate span{font-size:.66rem;color:#fff;font-weight:600;padding-bottom:2px}
+.bar-legend{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:6px;padding:0 4px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat .num{font-size:2rem;font-weight:700;line-height:1}
+.stat .lbl{font-size:.84rem;color:var(--muted)}
+
+/* Buttons */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;font-weight:600}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--red)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted);padding:6px 8px}
+.btn-big{display:block;width:100%;border:0;border-radius:12px;background:var(--blue);color:#fff;font-size:1.45rem;font-weight:600;padding:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+input[type=text],input[type=number],input[type=date],select{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%;min-width:0}
+input[type=number]{text-align:center;-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* Session */
+.session-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.clock{font-size:2.4rem;font-weight:700;line-height:1}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.ex-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.last{font-size:.86rem;color:var(--muted);margin:2px 0 10px}
+.sets{display:grid;grid-template-columns:28px 1fr 1fr 46px 30px;gap:6px 8px;align-items:center}
+.sets .hd{font-size:.78rem;color:var(--muted);text-align:center}
+.sets .idx{font-family:"Barlow Condensed",sans-serif;font-weight:600;color:var(--muted);text-align:center}
+.done-btn{width:46px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--field);font-size:1.1rem}
+.done-btn[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+input.pr{border-color:var(--yellow);background:var(--yellow-soft)}
+.pr-tag{display:inline-block;background:var(--yellow-soft);color:var(--ink);border:1px solid var(--yellow);font-size:.74rem;font-weight:600;border-radius:5px;padding:0 6px;margin-left:6px}
+.add-ex{display:flex;gap:8px;margin-top:14px}
+
+/* Rest timer */
+.rest{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(688px,calc(100% - 32px));background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;display:none;align-items:center;gap:12px;z-index:25}
+.rest.show{display:flex}
+.rest .num{font-size:1.8rem;font-weight:700;min-width:64px}
+.rest .track{flex:1;height:6px;background:rgba(127,127,127,.35);border-radius:3px;overflow:hidden}
+.rest .fill{height:100%;background:var(--yellow);width:100%}
+.rest button{background:none;border:1px solid rgba(127,127,127,.5);color:inherit;border-radius:8px;padding:4px 9px}
+
+/* History */
+.hist{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-top:10px}
+.hist summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+.hist summary::-webkit-details-marker{display:none}
+.hist .body{padding:0 14px 12px;border-top:1px solid var(--line)}
+.hist .line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.94rem}
+.hist .line:last-of-type{border-bottom:0}
+.month{font-family:"Barlow Condensed",sans-serif;font-weight:600;color:var(--muted);font-size:1.05rem;margin:22px 0 2px}
+
+/* Progress */
+.chart-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;overflow-x:auto}
+.chart-box svg{display:block;width:100%;height:auto;min-width:320px}
+.pr-list{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;font-size:.94rem;margin-top:10px}
+.pr-list .h{font-size:.8rem;color:var(--muted)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--muted)}
+.backup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.backup .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.remind{background:var(--yellow-soft);border:1px solid var(--yellow);border-radius:12px;padding:10px 14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+@media (max-width:420px){.stats .num{font-size:1.6rem}.clock{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Hantelbuch</h1>
+    <span class="sync" id="sync">Lädt…</span>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div class="rest" id="rest" role="status" aria-live="polite">
+  <span class="num" id="restNum">1:30</span>
+  <div class="track"><div class="fill" id="restFill"></div></div>
+  <button type="button" data-rest="-15">−15</button>
+  <button type="button" data-rest="15">+15</button>
+  <button type="button" data-rest="stop" aria-label="Pause beenden">✕</button>
+</div>
+
+<nav class="tabs" aria-label="Bereiche">
+  <div class="inner" role="tablist">
+    <button class="tab" role="tab" data-tab="train">Training</button>
+    <button class="tab" role="tab" data-tab="history">Verlauf</button>
+    <button class="tab" role="tab" data-tab="progress">Fortschritt</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const view = $("#view");
+const COMMON = ["Bankdrücken","Schrägbankdrücken","Kniebeugen","Kreuzheben","Rumänisches Kreuzheben","Schulterdrücken","Klimmzüge","Latziehen","Rudern vorgebeugt","Kabelrudern","Beinpresse","Ausfallschritte","Hip Thrust","Beinstrecker","Beinbeuger","Wadenheben","Dips","Seitheben","Face Pulls","Bizepscurls","Hammercurls","Trizepsdrücken am Kabel","Plank"];
+const SPLITS = ["Push","Pull","Beine","Oberkörper","Unterkörper","Ganzkörper"];
+
+let state = { tab:"train", sessions:[], draft:null, progressEx:null };
+let dbFailed = false; const isHosted = !!(window.claude && window.claude.use);
+let db = null, usingDb = false, userId = null, draftTimer = null;
+
+/* ---------- helpers ---------- */
+const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const parseD = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const fmtDate = s => parseD(s).toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"short"});
+const fmtNum = n => (Math.round(n*10)/10).toLocaleString("de-DE");
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const e1rm = (w,r) => r>0 && w>0 ? (r===1? w : w*(1+r/30)) : 0;
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function weekStart(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setHours(0,0,0,0); x.setDate(x.getDate()-day); return x; }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1800); }
+function lsGet(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsSet(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+function sortedSessions(){ return [...state.sessions].sort((a,b)=> (b.date+(b.startedAt||0)).localeCompare(a.date+(a.startedAt||0))); }
+function allExerciseNames(){
+  const s=new Set(); state.sessions.forEach(x=>(x.exercises||[]).forEach(e=>s.add(e.name)));
+  return [...s];
+}
+function lastFor(name, excludeId){
+  for(const s of sortedSessions()){ if(s.id===excludeId) continue; const e=(s.exercises||[]).find(x=>x.name.toLowerCase()===name.toLowerCase()); if(e) return {date:s.date, sets:e.sets}; }
+  return null;
+}
+function bestE1rm(name, excludeId){
+  let b=0; state.sessions.forEach(s=>{ if(s.id===excludeId) return; (s.exercises||[]).forEach(e=>{ if(e.name.toLowerCase()!==name.toLowerCase()) return; e.sets.forEach(st=>{ if(st.done!==false) b=Math.max(b,e1rm(+st.w,+st.r)); }); }); });
+  return b;
+}
+function volume(s){ let v=0; (s.exercises||[]).forEach(e=>e.sets.forEach(st=>{ if(st.done!==false) v+=(+st.w||0)*(+st.r||0); })); return v; }
+function setCount(s){ let n=0; (s.exercises||[]).forEach(e=>e.sets.forEach(st=>{ if(st.done!==false && +st.r>0) n++; })); return n; }
+
+/* ---------- storage ---------- */
+function draftRef(){ return (db && userId) ? db.doc("data/users/"+userId+"/draft") : null; }
+function setSaveState(t){ const el=document.getElementById("saveState"); if(el) el.textContent=t; }
+async function syncDraftNow(){
+  clearTimeout(draftTimer); draftTimer=null;
+  const ref=draftRef(); if(!ref){ setSaveState(state.draft?"Auf dem Gerät gespeichert":""); return; }
+  try{
+    if(state.draft) await ref.set({draft: JSON.parse(JSON.stringify(state.draft))});
+    else await ref.delete();
+    setSaveState(state.draft?"Online gespeichert ✓":"");
+  }catch(e){ setSaveState("Nur auf dem Gerät gespeichert – Verbindung prüfen"); }
+}
+function saveDraft(){
+  if(state.draft) state.draft.updatedAt=Date.now();
+  lsSet("hb-draft", state.draft);
+  if(draftRef()){ setSaveState("Speichert…"); clearTimeout(draftTimer); draftTimer=setTimeout(syncDraftNow,600); }
+  else setSaveState(state.draft?"Auf dem Gerät gespeichert":"");
+}
+function flushDraft(){ if(draftTimer) syncDraftNow(); }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") flushDraft(); });
+window.addEventListener("pagehide",flushDraft);
+function loadLocalSessions(){ state.sessions = lsGet("hb-sessions") || []; }
+async function persistSession(s){
+  if(usingDb){
+    try{ await db.collection("sessions").doc(s.id).set(s); return true; }
+    catch(err){ if(err && err.code==="quota_exceeded") toast("Speicher voll – alte Einheiten löschen"); else toast("Speichern fehlgeschlagen – bitte nochmal"); return false; }
+  }
+  const i=state.sessions.findIndex(x=>x.id===s.id); if(i>=0) state.sessions[i]=s; else state.sessions.push(s);
+  lsSet("hb-sessions", state.sessions); render(); return true;
+}
+async function removeSession(id){
+  if(usingDb){ try{ await db.collection("sessions").doc(id).delete(); }catch(e){ toast("Löschen fehlgeschlagen"); } return; }
+  state.sessions=state.sessions.filter(x=>x.id!==id); lsSet("hb-sessions",state.sessions); render();
+}
+
+/* ---------- rest timer ---------- */
+let rest={end:0,total:90,iv:null};
+function startRest(sec){
+  rest.total=sec||lsGet("hb-rest")||90; rest.end=Date.now()+rest.total*1000;
+  $("#rest").classList.add("show"); clearInterval(rest.iv); rest.iv=setInterval(tickRest,250); tickRest();
+}
+function tickRest(){
+  const left=Math.max(0,Math.round((rest.end-Date.now())/1000));
+  $("#restNum").textContent=Math.floor(left/60)+":"+String(left%60).padStart(2,"0");
+  $("#restFill").style.width=(rest.total? left/rest.total*100:0)+"%";
+  if(left<=0){ clearInterval(rest.iv); $("#restNum").textContent="Los!"; try{ navigator.vibrate&&navigator.vibrate([200,100,200]); }catch(e){} setTimeout(()=>{ if(Date.now()>=rest.end) $("#rest").classList.remove("show"); },2500); }
+}
+document.querySelectorAll("[data-rest]").forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.rest;
+  if(v==="stop"){ clearInterval(rest.iv); $("#rest").classList.remove("show"); return; }
+  const d=+v; rest.end+=d*1000; rest.total=Math.max(15,rest.total+d); lsSet("hb-rest",Math.max(15,(lsGet("hb-rest")||90)+d)); tickRest();
+}));
+
+/* ---------- backup (local mode) ---------- */
+function localMode(){ return !usingDb && (!isHosted || dbFailed); }
+function daysSinceBackup(){ const t=lsGet("hb-lastbackup"); return t? Math.floor((Date.now()-t)/86400000) : null; }
+async function exportData(){
+  if(!state.sessions.length){ toast("Noch nichts zu sichern"); return; }
+  const payload={app:"hantelbuch",version:1,exportedAt:new Date().toISOString(),sessions:state.sessions};
+  const name="hantelbuch-sicherung-"+todayStr()+".json";
+  const blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
+  try{
+    const file=new File([blob],name,{type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"Hantelbuch-Sicherung"});
+      lsSet("hb-lastbackup",Date.now()); toast("Sicherung erstellt"); render(); return;
+    }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  lsSet("hb-lastbackup",Date.now()); toast("Sicherung heruntergeladen"); render();
+}
+function validSession(x){
+  return x && typeof x.id==="string" && /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") && Array.isArray(x.exercises);
+}
+function importData(file){
+  const r=new FileReader();
+  r.onload=async()=>{
+    let data; try{ data=JSON.parse(r.result); }catch(e){ toast("Die Datei ist keine gültige Sicherung"); return; }
+    const list=Array.isArray(data)?data:(data&&data.sessions);
+    if(!Array.isArray(list)){ toast("Die Datei ist keine gültige Sicherung"); return; }
+    const clean=list.filter(validSession).map(x=>({id:x.id,name:String(x.name||"Training").slice(0,40),date:x.date,startedAt:+x.startedAt||0,durationMin:+x.durationMin||0,
+      exercises:x.exercises.filter(e=>e&&e.name&&Array.isArray(e.sets)).map(e=>({name:String(e.name).slice(0,50),sets:e.sets.map(st=>({w:+st.w||0,r:+st.r||0,done:true})).filter(st=>st.r>0)})).filter(e=>e.sets.length)}));
+    const fresh=clean.filter(c=>!state.sessions.some(s=>s.id===c.id));
+    if(!fresh.length){ toast("Alles aus dieser Sicherung ist schon vorhanden"); return; }
+    if(usingDb){ for(const f of fresh){ try{ await db.collection("sessions").doc(f.id).set(f); }catch(e){} } }
+    else { state.sessions=state.sessions.concat(fresh); lsSet("hb-sessions",state.sessions); }
+    toast(fresh.length+(fresh.length===1?" Einheit":" Einheiten")+" wiederhergestellt"); render();
+  };
+  r.readAsText(file);
+}
+function backupHtml(){
+  const d=daysSinceBackup();
+  const when = d===null ? "Noch keine Sicherung erstellt." : d===0 ? "Letzte Sicherung: heute." : d===1 ? "Letzte Sicherung: gestern." : `Letzte Sicherung: vor ${d} Tagen.`;
+  return `<h2>Sicherung</h2><div class="backup">
+    <div class="small">Deine Einheiten sind nur auf diesem Handy gespeichert. Speichere regelmäßig eine Sicherung, zum Beispiel in „Dateien“, Google Drive oder schick sie dir selbst per WhatsApp. So kannst du sie auf einem neuen Handy wieder einlesen.</div>
+    <div class="small muted" style="margin-top:6px">${when}</div>
+    <div class="row">
+      <button type="button" class="btn primary" id="exportBtn">Sicherung speichern</button>
+      <button type="button" class="btn" id="importBtn">Sicherung wiederherstellen</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div></div>`;
+}
+function bindBackup(){
+  const ex=document.getElementById("exportBtn"); if(!ex) return;
+  ex.addEventListener("click",exportData);
+  const f=document.getElementById("importFile");
+  document.getElementById("importBtn").addEventListener("click",()=>f.click());
+  f.addEventListener("change",()=>{ if(f.files[0]) importData(f.files[0]); f.value=""; });
+}
+
+/* ---------- views ---------- */
+function render(){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", String(t.dataset.tab===state.tab)));
+  if(state.tab==="train") renderTrain();
+  else if(state.tab==="history") renderHistory();
+  else renderProgress();
+}
+
+function weeksStrip(){
+  const now=weekStart(new Date()); const weeks=[];
+  for(let i=11;i>=0;i--){ const ws=new Date(now); ws.setDate(ws.getDate()-7*i); weeks.push({ws,n:0}); }
+  state.sessions.forEach(s=>{ const w=weekStart(parseD(s.date)).getTime(); const f=weeks.find(x=>x.ws.getTime()===w); if(f) f.n++; });
+  let streak=0; for(let i=weeks.length-1;i>=0;i--){ if(weeks[i].n>0) streak++; else if(i===weeks.length-1) continue; else break; }
+  const max=Math.max(3,...weeks.map(w=>w.n));
+  const plates=weeks.map((w,i)=>{ const h=26+Math.min(w.n,max)/max*46; return `<div class="plate${w.n?" on":""}${i===11?" now":""}" style="height:${h}px" title="Woche ab ${w.ws.toLocaleDateString("de-DE")}: ${w.n} Einheit(en)">${w.n?`<span>${w.n}</span>`:""}</div>`; }).join("");
+  return {html:`<div class="bar" aria-label="Einheiten pro Woche, letzte 12 Wochen">${plates}</div><div class="bar-legend"><span>vor 12 Wochen</span><span>diese Woche</span></div>`, streak, thisWeek:weeks[11].n};
+}
+
+function renderTrain(){
+  if(state.draft){ renderSession(); return; }
+  const strip=weeksStrip();
+  const total=state.sessions.length;
+  const lastS=sortedSessions()[0];
+  const lastNames=[...new Set(sortedSessions().map(s=>s.name))].slice(0,4);
+  const names=[...new Set([...lastNames,...SPLITS])];
+  view.innerHTML=`
+    ${strip.html}
+    <div class="stats">
+      <div class="stat"><div class="num">${strip.thisWeek}</div><div class="lbl">diese Woche</div></div>
+      <div class="stat"><div class="num">${strip.streak}</div><div class="lbl">Wochen in Folge</div></div>
+      <div class="stat"><div class="num">${total}</div><div class="lbl">Einheiten gesamt</div></div>
+    </div>
+    ${ (localMode() && total>=3 && (daysSinceBackup()===null || daysSinceBackup()>=14)) ? `<div class="remind"><span class="small">${daysSinceBackup()===null?"Du hast noch keine Sicherung deiner Einheiten.":"Deine letzte Sicherung ist "+daysSinceBackup()+" Tage alt."}</span><button type="button" class="btn" id="remindBtn">Jetzt sichern</button></div>`:""}
+    <h2>Neue Einheit</h2>
+    <label class="small muted" for="sName">Was trainierst du heute?</label>
+    <div class="chips" id="chips">${names.map(n=>`<button type="button" class="chip" data-name="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+    <div style="display:flex;gap:8px;margin:8px 0 14px"><input type="text" id="sName" placeholder="Eigener Name, z. B. Push A" maxlength="40"></div>
+    <button class="btn-big" id="startBtn">Training starten</button>
+    <p class="small muted" id="repeatHint" style="margin-top:8px">${lastS?`Letzte Einheit: ${esc(lastS.name)}, ${fmtDate(lastS.date)}. Wenn du denselben Namen wählst, werden die Übungen und Gewichte von damals vorgeschlagen.`:"Deine Einheiten werden hier gespeichert – starte einfach mit der ersten."}</p>
+  `;
+  const rb=$("#remindBtn"); if(rb) rb.addEventListener("click",exportData);
+  const inp=$("#sName");
+  $("#chips").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return; inp.value=b.dataset.name; document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c===b))); });
+  $("#startBtn").addEventListener("click",()=>{
+    const name=inp.value.trim()||"Training";
+    const prev=sortedSessions().find(s=>s.name.toLowerCase()===name.toLowerCase());
+    const exercises = prev ? prev.exercises.map(e=>({name:e.name, sets:e.sets.map(s=>({w:s.w,r:s.r,done:false}))})) : [];
+    state.draft={id:uid(), name, date:todayStr(), startedAt:Date.now(), exercises};
+    saveDraft(); render();
+  });
+}
+
+let clockIv=null;
+function renderSession(){
+  const d=state.draft;
+  const names=[...new Set([...allExerciseNames(),...COMMON])];
+  view.innerHTML=`
+    <div class="session-head">
+      <div>
+        <h2 style="margin:0">${esc(d.name)}</h2>
+        <div class="small muted" id="saveState" aria-live="polite">${draftRef()?"Online gespeichert ✓":"Auf dem Gerät gespeichert"}</div>
+        <div class="small muted"><input type="date" id="sDate" value="${d.date}" style="width:auto;padding:3px 8px;margin-top:4px" aria-label="Datum"></div>
+      </div>
+      <div style="text-align:right"><div class="clock num" id="clock">0:00</div><div class="small muted">Dauer</div></div>
+    </div>
+    <div id="exList"></div>
+    <div class="add-ex">
+      <input type="text" id="newEx" list="exNames" placeholder="Übung hinzufügen, z. B. Bankdrücken" maxlength="50">
+      <button class="btn primary" id="addEx" type="button">Hinzufügen</button>
+    </div>
+    <datalist id="exNames">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+    <div style="display:flex;gap:10px;margin-top:26px">
+      <button class="btn-big" id="finish" style="flex:1">Einheit speichern</button>
+    </div>
+    <div style="text-align:center;margin-top:8px"><button class="btn ghost" id="discard" type="button">Einheit verwerfen</button></div>
+  `;
+  drawExercises();
+  clearInterval(clockIv);
+  const tick=()=>{ const el=$("#clock"); if(!el){ clearInterval(clockIv); return; } const s=Math.floor((Date.now()-d.startedAt)/1000); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); el.textContent=(h?h+":"+String(m).padStart(2,"0"):m)+":"+String(s%60).padStart(2,"0"); };
+  tick(); clockIv=setInterval(tick,1000);
+  $("#sDate").addEventListener("change",e=>{ if(e.target.value){ d.date=e.target.value; saveDraft(); } });
+  const add=()=>{ const v=$("#newEx").value.trim(); if(!v) return; const last=lastFor(v,d.id); d.exercises.push({name:v, sets: last? last.sets.map(s=>({w:s.w,r:s.r,done:false})) : [{w:"",r:"",done:false}]}); $("#newEx").value=""; saveDraft(); drawExercises(); };
+  $("#addEx").addEventListener("click",add);
+  $("#newEx").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } });
+  $("#discard").addEventListener("click",()=>{ if(confirm("Diese Einheit verwerfen? Eingetragene Sätze gehen verloren.")){ state.draft=null; saveDraft(); clearInterval(clockIv); render(); } });
+  $("#finish").addEventListener("click",async()=>{
+    const clean=d.exercises.map(e=>({name:e.name, sets:e.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0, r:+s.r, done:true}))})).filter(e=>e.sets.length);
+    if(!clean.length){ toast("Trag mindestens einen Satz mit Wiederholungen ein"); return; }
+    const s={id:d.id,name:d.name,date:d.date,startedAt:d.startedAt,durationMin:Math.round((Date.now()-d.startedAt)/60000),exercises:clean};
+    const btn=$("#finish"); btn.disabled=true; btn.textContent="Speichert…";
+    const ok=await persistSession(s);
+    if(ok){ state.draft=null; saveDraft(); clearInterval(clockIv); clearInterval(rest.iv); $("#rest").classList.remove("show"); toast("Einheit gespeichert 💪"); state.tab="history"; render(); }
+    else { btn.disabled=false; btn.textContent="Einheit speichern"; }
+  });
+}
+
+function drawExercises(){
+  const d=state.draft; const box=$("#exList"); if(!box) return;
+  if(!d.exercises.length){ box.innerHTML=`<div class="empty" style="margin-top:14px">Noch keine Übung. Füge unten deine erste hinzu.</div>`; return; }
+  box.innerHTML=d.exercises.map((e,ei)=>{
+    const last=lastFor(e.name,d.id); const best=bestE1rm(e.name,d.id);
+    const lastTxt= last ? `Letztes Mal (${fmtDate(last.date)}): ${last.sets.map(s=>fmtNum(s.w)+"×"+s.r).join(", ")}` : "Erste Einheit mit dieser Übung";
+    const rows=e.sets.map((s,si)=>{
+      const pr = best>0 && s.done && e1rm(+s.w,+s.r)>best;
+      return `<span class="idx">${si+1}</span>
+        <input type="number" inputmode="decimal" step="0.5" min="0" value="${s.w}" data-ei="${ei}" data-si="${si}" data-f="w" aria-label="Gewicht Satz ${si+1}" class="${pr?"pr":""}">
+        <input type="number" inputmode="numeric" step="1" min="0" value="${s.r}" data-ei="${ei}" data-si="${si}" data-f="r" aria-label="Wiederholungen Satz ${si+1}">
+        <button type="button" class="done-btn" aria-pressed="${s.done}" data-ei="${ei}" data-si="${si}" data-act="done" aria-label="Satz ${si+1} erledigt">✓</button>
+        <button type="button" class="btn ghost" data-ei="${ei}" data-si="${si}" data-act="delset" aria-label="Satz ${si+1} löschen">✕</button>`;
+    }).join("");
+    const prNow = best>0 && e.sets.some(s=>s.done && e1rm(+s.w,+s.r)>best);
+    return `<section class="ex">
+      <div class="ex-head"><h3>${esc(e.name)}${prNow?`<span class="pr-tag">Neuer Rekord</span>`:""}</h3>
+        <button type="button" class="btn ghost" data-ei="${ei}" data-act="delex">Entfernen</button></div>
+      <p class="last">${esc(lastTxt)}</p>
+      <div class="sets"><span class="hd">Satz</span><span class="hd">kg</span><span class="hd">Wdh.</span><span class="hd">Fertig</span><span></span>${rows}</div>
+      <button type="button" class="btn" style="margin-top:10px" data-ei="${ei}" data-act="addset">+ Satz</button>
+    </section>`;
+  }).join("");
+}
+view.addEventListener("input",e=>{
+  const t=e.target; if(!state.draft||t.dataset.f==null) return;
+  const s=state.draft.exercises[+t.dataset.ei].sets[+t.dataset.si]; s[t.dataset.f]=t.value; saveDraft();
+});
+view.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b||!state.draft) return;
+  const d=state.draft, ei=+b.dataset.ei, si=+b.dataset.si, ex=d.exercises[ei];
+  const act=b.dataset.act;
+  if(act==="done"){ const s=ex.sets[si]; if(!(+s.r>0)){ toast("Erst Wiederholungen eintragen"); return; } s.done=!s.done; if(s.done) startRest(); }
+  else if(act==="addset"){ const l=ex.sets[ex.sets.length-1]; ex.sets.push({w:l?l.w:"",r:l?l.r:"",done:false}); }
+  else if(act==="delset"){ ex.sets.splice(si,1); if(!ex.sets.length) ex.sets.push({w:"",r:"",done:false}); }
+  else if(act==="delex"){ if(!confirm(`„${ex.name}“ aus dieser Einheit entfernen?`)) return; d.exercises.splice(ei,1); }
+  else return;
+  saveDraft(); drawExercises();
+});
+
+function renderHistory(){
+  const list=sortedSessions();
+  if(!list.length){ view.innerHTML=`<h2 style="margin-top:0">Verlauf</h2><div class="empty">Noch keine gespeicherten Einheiten. Unter „Training“ legst du die erste an.</div>${localMode()?backupHtml():""}`; bindBackup(); return; }
+  let html=`<h2 style="margin-top:0">Verlauf</h2>`, month="";
+  list.forEach(s=>{
+    const m=parseD(s.date).toLocaleDateString("de-DE",{month:"long",year:"numeric"});
+    if(m!==month){ month=m; html+=`<div class="month">${m}</div>`; }
+    html+=`<details class="hist"><summary><span><strong>${esc(s.name)}</strong><br><span class="small muted">${fmtDate(s.date)}${s.durationMin?` · ${s.durationMin} min`:""}</span></span>
+      <span style="text-align:right"><span class="num" style="font-size:1.35rem;font-weight:600">${fmtNum(volume(s))} kg</span><br><span class="small muted">${setCount(s)} Sätze</span></span></summary>
+      <div class="body">${s.exercises.map(e=>`<div class="line"><span>${esc(e.name)}</span><span class="muted">${e.sets.map(x=>fmtNum(x.w)+"×"+x.r).join(", ")}</span></div>`).join("")}
+      <div style="text-align:right;margin-top:8px"><button type="button" class="btn danger" data-del="${s.id}">Einheit löschen</button></div></div></details>`;
+  });
+  if(localMode()) html+=backupHtml();
+  view.innerHTML=html; bindBackup();
+  view.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{ if(confirm("Diese Einheit endgültig löschen?")) removeSession(b.dataset.del); }));
+}
+
+function renderProgress(){
+  const names=allExerciseNames().sort((a,b)=>a.localeCompare(b,"de"));
+  if(!names.length){ view.innerHTML=`<h2 style="margin-top:0">Fortschritt</h2><div class="empty">Sobald du Einheiten gespeichert hast, siehst du hier deine Kurven und Rekorde.</div>`; return; }
+  // count frequency to pick default
+  const freq={}; state.sessions.forEach(s=>s.exercises.forEach(e=>freq[e.name]=(freq[e.name]||0)+1));
+  if(!state.progressEx||!names.includes(state.progressEx)) state.progressEx=names.slice().sort((a,b)=>freq[b]-freq[a])[0];
+  const ex=state.progressEx;
+  const pts=[]; // per session: best e1rm, top weight
+  [...state.sessions].sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+    const e=s.exercises.find(x=>x.name===ex); if(!e) return;
+    let b=0, top=0, bestSet=null; e.sets.forEach(st=>{ const v=e1rm(+st.w,+st.r); if(v>b){ b=v; bestSet=st; } top=Math.max(top,+st.w); });
+    pts.push({date:s.date, e1:b, top, set:bestSet});
+  });
+  // PR table across exercises
+  const prs=names.map(n=>{ let b=0,set=null,date=""; state.sessions.forEach(s=>s.exercises.forEach(e=>{ if(e.name!==n) return; e.sets.forEach(st=>{ const v=e1rm(+st.w,+st.r); if(v>b){b=v;set=st;date=s.date;} }); })); return {n,b,set,date}; }).filter(p=>p.b>0).sort((a,b)=>b.b-a.b);
+
+  view.innerHTML=`
+    <h2 style="margin-top:0">Fortschritt</h2>
+    <label class="small muted" for="exSel">Übung</label>
+    <select id="exSel" style="margin-top:4px">${names.map(n=>`<option ${n===ex?"selected":""}>${esc(n)}</option>`).join("")}</select>
+    <div class="chart-box">${chartSvg(pts)}</div>
+    <p class="small muted">Blaue Linie: geschätztes Maximalgewicht für eine Wiederholung (aus Gewicht und Wiederholungen berechnet). Graue Linie: schwerstes aufgelegtes Gewicht.</p>
+    ${pts.length?`<div class="stats"><div class="stat"><div class="num">${fmtNum(Math.max(...pts.map(p=>p.e1)))}</div><div class="lbl">bestes 1RM (geschätzt), kg</div></div>
+    <div class="stat"><div class="num">${fmtNum(Math.max(...pts.map(p=>p.top)))}</div><div class="lbl">schwerstes Gewicht, kg</div></div>
+    <div class="stat"><div class="num">${pts.length}</div><div class="lbl">Einheiten mit dieser Übung</div></div></div>`:""}
+    <h2>Deine Rekorde</h2>
+    ${prs.length?`<div class="pr-list"><span class="h">Übung</span><span class="h">Bester Satz</span><span class="h">1RM geschätzt</span>
+      ${prs.map(p=>`<span>${esc(p.n)}</span><span class="muted">${fmtNum(p.set.w)} × ${p.set.r}</span><span class="num" style="font-weight:600;text-align:right">${fmtNum(p.b)} kg</span>`).join("")}</div>`:`<div class="empty">Rekorde erscheinen, sobald du Sätze mit Gewicht einträgst.</div>`}
+  `;
+  $("#exSel").addEventListener("change",e=>{ state.progressEx=e.target.value; renderProgress(); });
+}
+
+function chartSvg(pts){
+  if(!pts.length || pts.every(p=>!p.e1)) return `<p class="muted" style="margin:10px">Für diese Übung gibt es noch keine Sätze mit Gewicht.</p>`;
+  const W=640,H=260,L=44,R=14,T=16,B=34;
+  const vals=pts.flatMap(p=>[p.e1,p.top]).filter(v=>v>0);
+  let lo=Math.min(...vals), hi=Math.max(...vals); const pad=Math.max(2,(hi-lo)*0.12); lo=Math.max(0,Math.floor((lo-pad)/5)*5); hi=Math.ceil((hi+pad)/5)*5; if(hi===lo) hi=lo+5;
+  const x=i=> pts.length===1 ? (L+W-R)/2 : L+i*(W-L-R)/(pts.length-1);
+  const y=v=> T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const ticks=4; let grid="";
+  for(let i=0;i<=ticks;i++){ const v=lo+(hi-lo)*i/ticks; grid+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(v)}</text>`; }
+  const line=(k,col,wd)=>{ const p=pts.map((pt,i)=>pt[k]>0?`${x(i)},${y(pt[k])}`:null).filter(Boolean); return p.length>1?`<polyline points="${p.join(" ")}" fill="none" stroke="${col}" stroke-width="${wd}" stroke-linejoin="round" stroke-linecap="round"/>`:""; };
+  const step=Math.ceil(pts.length/6);
+  const labels=pts.map((p,i)=> (i%step===0||i===pts.length-1)?`<text x="${x(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="var(--muted)">${parseD(p.date).toLocaleDateString("de-DE",{day:"numeric",month:"numeric"})}</text>`:"").join("");
+  let runBest=0;
+  const dots=pts.map((p,i)=>{ const isPr=p.e1>runBest; if(isPr) runBest=p.e1; return p.e1>0?`<circle cx="${x(i)}" cy="${y(p.e1)}" r="${isPr?5.5:3.5}" fill="${isPr?"var(--yellow)":"var(--blue)"}" stroke="var(--surface)" stroke-width="1.5"><title>${fmtDate(p.date)}: ${fmtNum(p.set.w)} kg × ${p.set.r} → ${fmtNum(p.e1)} kg</title></circle>`:""; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf der Kraftwerte">${grid}${line("top","var(--muted)",1.5)}${line("e1","var(--blue)",2.5)}${dots}${labels}</svg>
+  <div class="small muted" style="margin-top:4px"><span style="color:var(--yellow)">●</span> gelbe Punkte markieren einen neuen Rekord</div>`;
+}
+
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{ state.tab=t.dataset.tab; render(); window.scrollTo(0,0); }));
+
+/* ---------- boot ---------- */
+state.draft=lsGet("hb-draft");
+loadLocalSessions();
+$("#sync").textContent="Auf diesem Gerät";
+render();
+
+(async()=>{
+  try{
+    if(!window.claude || !window.claude.use) return;
+    const d=await window.claude.use("db");
+    if(!d){ dbFailed=true; render(); return; }
+    db=d;
+    try{
+      const u=await window.claude.use("user");
+      if(u) userId=await u.id();
+      const ref=draftRef();
+      if(ref){
+        const snap=await ref.get();
+        const remote=snap.exists ? (snap.data()||{}).draft : null;
+        const local=state.draft;
+        if(remote && (!local || (remote.updatedAt||0) > (local.updatedAt||0))){
+          state.draft=JSON.parse(JSON.stringify(remote)); lsSet("hb-draft",state.draft); state.tab="train"; render();
+          toast("Laufende Einheit wiederhergestellt");
+        } else if(local){ syncDraftNow(); }
+        setSaveState(state.draft?"Online gespeichert ✓":"");
+      }
+    }catch(e){}
+    db.collection("sessions").onSnapshot(snap=>{
+      usingDb=true;
+      const fromDb=snap.docs.map(x=>x.data()).filter(Boolean).map(x=>JSON.parse(JSON.stringify(x)));
+      // migrate anything saved locally before the sync was ready
+      const local=lsGet("hb-sessions")||[];
+      const missing=local.filter(l=>!fromDb.some(r=>r.id===l.id));
+      if(missing.length && !snap.metadata.fromCache){ missing.forEach(m=>db.collection("sessions").doc(m.id).set(m).catch(()=>{})); lsSet("hb-sessions",null); }
+      state.sessions=fromDb.concat(missing.filter(m=>!fromDb.some(r=>r.id===m.id)));
+      $("#sync").textContent="Synchronisiert";
+      if(!(state.tab==="train" && state.draft)) render();
+    },err=>{ usingDb=false; dbFailed=true; $("#sync").textContent="Nur auf diesem Gerät"; if(!(state.tab==="train"&&state.draft)) render(); });
+  }catch(e){ dbFailed=true; render(); }
+})();
+})();
+</script>
+</body>
+</html>
